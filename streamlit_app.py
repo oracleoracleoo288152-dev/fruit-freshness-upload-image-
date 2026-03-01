@@ -52,7 +52,7 @@ model = load_model()
 STRINGS = {
     "app_title": " Fruit Freshness Detector",
     "app_subtitle": "Detect whether a fruit is fresh or rotten using YOLO",
-    "upload_header": "📤 Upload Fruit Image",
+    "upload_header": " Upload Fruit Image",
     "upload_label": "Upload Image",
     "uploaded_caption": "Uploaded Image",
     "detection_caption": "Detection Result",
@@ -318,6 +318,7 @@ if uploaded_file is not None:
 
     else:
         st.warning(" No fruit detected.")
+
 
 
 
