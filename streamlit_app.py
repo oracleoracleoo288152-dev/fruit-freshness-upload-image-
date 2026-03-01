@@ -8,9 +8,7 @@ import difflib
 from db import save_upload
 import os
 
-
 st.set_page_config(page_title="Rotten or Not ", layout="wide")
-
 
 st.markdown(
     """
@@ -39,8 +37,6 @@ st.markdown(
 )
 
 
-
-
 @st.cache_resource
 def load_model():
     return YOLO("best1.pt")
@@ -48,15 +44,14 @@ def load_model():
 model = load_model()
 
 
-
 STRINGS = {
-    "app_title": " Fruit Freshness Detector",
+    "app_title": "Fruit Freshness Detector",
     "app_subtitle": "Detect whether a fruit is fresh or rotten using YOLO",
-    "upload_header": " Upload Fruit Image",
+    "upload_header": "Upload Fruit Image",
     "upload_label": "Upload Image",
     "uploaded_caption": "Uploaded Image",
     "detection_caption": "Detection Result",
-    "no_fruit": " No fruit detected.",
+    "no_fruit": "No fruit detected.",
     "recipes_header": "Recipe Ideas",
     "no_recipe_for": "No recipe found for {name}.",
     "model_loaded": "Model loaded successfully!",
@@ -78,7 +73,6 @@ def t(key, **kwargs):
             return text
     return text
 
-
 with st.sidebar:
     st.markdown("<div class='glass'>", unsafe_allow_html=True)
     st.success(t("model_loaded"))
@@ -88,15 +82,13 @@ with st.sidebar:
     conf_thresh = st.slider(t("confidence_threshold"), 0.0, 1.0, 0.3, 0.05)
     st.markdown("</div>", unsafe_allow_html=True)
 
-
 st.markdown("<div class='glass' style='margin-bottom:18px'><div class='big-title'>" + t("app_title") + "</div><div class='subtitle'>" + t("app_subtitle") + "</div></div>", unsafe_allow_html=True)
-
 
 st.markdown(
         """
         <div class='glass' style='display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;padding:12px 18px'>
             <div style='display:flex;align-items:center;gap:12px'>
-                <div style='width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#60a5fa22,#7ef0c022);font-weight:800'>🍏</div>
+                <div style='width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#60a5fa22,#7ef0c022);font-weight:800'></div>
                 <div style='font-weight:700;color:#f8fafc'>Rotten or Not</div>
             </div>
             <div style='display:flex;align-items:center;gap:18px'>
@@ -111,7 +103,6 @@ st.markdown(
         """,
         unsafe_allow_html=True,
 )
-
 
 RECIPES = {
     "apple": {
@@ -141,25 +132,19 @@ RECIPES = {
     }
 }
 
-
-
 def extract_fruit_name(label: str) -> str:
     """Normalize model label to a fruit name key used in RECIPES."""
     s = label.lower()
     s = s.replace("_", " ")
-    # remove words indicating freshness
     s = re.sub(r"\b(fresh|rotten|ripe|unripe|good|bad)\b", "", s)
     s = re.sub(r"[^a-z\s]", "", s)
     s = s.strip()
-   
     parts = s.split()
     if len(parts) == 0:
         return ""
-
     for p in parts:
         if p in RECIPES:
             return p
-
     return parts[-1]
 
 
@@ -175,7 +160,6 @@ def auto_map_fruit(detected_info, conf_thresh=0.3):
     if not detected_info:
         return None
 
-
     items = sorted(detected_info, key=lambda x: x.get("conf", 0), reverse=True)
     keys = list(RECIPES.keys())
 
@@ -187,22 +171,18 @@ def auto_map_fruit(detected_info, conf_thresh=0.3):
         name = extract_fruit_name(label)
         if name in RECIPES:
             return name
-  
         for k in keys:
             if k in label:
                 return k
-    
         match = difflib.get_close_matches(label, keys, n=1, cutoff=0.6)
         if match:
             return match[0]
-  
         for token in label.split():
             match = difflib.get_close_matches(token, keys, n=1, cutoff=0.7)
             if match:
                 return match[0]
 
     return None
-
 
 st.markdown("<div class='glass' style='margin-bottom:12px;padding:12px'><h2 id='upload' style='margin:0;color:#f8fafc'>" + t("upload_header") + "</h2></div>", unsafe_allow_html=True)
 
@@ -212,13 +192,11 @@ uploaded_file = st.file_uploader(
 )
 
 if uploaded_file is not None:
-
     raw_bytes = uploaded_file.read()
     file_bytes = np.asarray(bytearray(raw_bytes), dtype=np.uint8)
     frame = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
 
     frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
 
     frame_resized = cv2.resize(frame_rgb, (640, 640))
 
@@ -253,7 +231,6 @@ if uploaded_file is not None:
              caption=t("detection_caption"),
              width="stretch")
 
-       
         st.markdown("---")
         if t("detection_details", ):
             pass
@@ -265,7 +242,6 @@ if uploaded_file is not None:
                 st.write(pred.names)
             except Exception:
                 st.write("(no mapping available)")
-
 
         st.markdown(":information_source: " + t("auto_map_info"))
 
@@ -279,9 +255,7 @@ if uploaded_file is not None:
             else:
                 st.warning(t("auto_map_failed"))
 
- 
         if not chosen_fruit:
-          
             fruit_keys = []
             for lab in detected_labels:
                 name = extract_fruit_name(lab)
@@ -302,7 +276,6 @@ if uploaded_file is not None:
         else:
             st.info(STRINGS.get("no_recipe_for").format(name=chosen_fruit))
 
-      
         try:
             cloud_cfg = {
                 "cloud_name": os.getenv("CLOUDINARY_CLOUD_NAME", "dgosjbdx7"),
@@ -317,8 +290,4 @@ if uploaded_file is not None:
             st.warning(f"Could not save upload to database/cloud: {e}")
 
     else:
-        st.warning(" No fruit detected.")
-
-
-
-
+        st.warning("No fruit detected.")
